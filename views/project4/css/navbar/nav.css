@@ -1,0 +1,9 @@
+.navbar {
+  position: fixed;
+  width: 100%;
+}
+
+.navbar-toggler {
+  margin-right: 1rem !important;
+}
+/*# sourceMappingURL=nav.css.map */

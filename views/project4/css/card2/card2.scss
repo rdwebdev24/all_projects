@@ -1,0 +1,31 @@
+@import "../global/mixin";
+
+
+
+.card2Wrapper{
+     @include flexprob(column,center);
+     min-height: 100vh;
+
+     h1{
+          padding: 1rem;
+     }
+     .card2box{
+          @include flexprob(row, space-evenly);
+          width: 100%;
+          align-items: baseline;
+          flex-wrap: wrap;
+
+          .card2body{
+               @include flexprob(column,center);
+               width: 100%;
+               max-width: 25rem;
+               padding: 1rem;
+               gap: 1rem;
+               align-items: flex-start;
+               
+               .card2img{
+                    width: 15rem;
+               }
+          }
+     }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+
+  </head>
+  <body>
+    <nav>
+      <select id="select">
+        <option value="" disabled selected>algo</option>
+        <option value="selection">selection sort</option>
+        <option value="merge">merge sort</option>
+        <option value="bubble">bubble sort</option>
+      </select>
+      <select id="select-ele">
+        <option value="" disabled selected=>elements</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="180">182</option>
+      </select>
+      <select id="select-speed">
+        <option value="" disabled selected=>speed</option>
+        <option value="10">10</option>
+        <option value="100">100</option>
+        <option value="500">500</option>
+      </select>
+    </nav>
+    <div class="btn-div">
+      <button class="btn">start</button>
+      <button class="btn">shuffle</button>
+    </div>
+    <div class="board"></div>
+    <script src="./index.js"></script>
+  </body>
+</html>
