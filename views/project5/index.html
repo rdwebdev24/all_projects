@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+ <html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="kts.css">
+  <link rel="stylesheet" href="./global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Paytone+One&family=Poppins:wght@300;400&family=Rosarivo&family=Ubuntu&display=swap" rel="stylesheet">
+  <title>Website with Stopwatch</title>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a onclick="showHome()" href="#">KYT</a></li>
+      <li><a onclick="showHome()" href="#home">Home</a></li>
+      <li><a onclick="showAbout()" href="#about">Task</a></li>
+      <li><a onclick="showAnalysis()" href="#analysis">Analysis</a></li>
+    </ul>
+  </nav>
+  <div class="container">
+   
+    <section id="home">
+      <div class="bg-img">
+        <img src="./assets/clock.png" alt="bg image">
+      </div>
+         <div class="timer-cont">
+             <div id="timer">00:00:00</div>
+             <div class="st-en">
+              <div class="st">
+                <p>start time</p>
+                <p style="text-align: center;">00 : 00</p>
+              </div>
+              <div class="en">
+                <p>end time</p>
+                <p style="text-align: center;">00 : 00</p>
+              </div>
+             </div>
+             <div class="goal"></div>
+        </div>
+     </section> 
+
+      <section id="about">
+          <h1 class="about-head">Schedule Planner</h1>
+          <div class="taskFormContainer">
+            <!-- FORM FOR TAKING INPUT -->
+                <form class="form">
+                  <div class="st-en-wrp">
+                    <input class="time-inp" type="time" name="start_time"  placeholder="Enter start time">
+                    <input class="time-inp" type="time" name="end_time" placeholder="Enter end time">
+                  </div>
+                  <input spellcheck="true" class="time-inp" type="text" name="goal" placeholder="Enter a goal">
+                  <button id="addTask">Add Task</button>
+              </form>
+              <!-- FOR DISPLAYING THE ADDED TASK -->
+              <div class="taskcontainer">
+                <h2>Your tasks</h2>
+                <div class="task-list">
+                  <!-- list items goes here -->
+                </div>
+              </div>
+          </div>
+      </section>
+
+      <section id="analysis">
+        <h1>ANALYSIS</h1>
+      </section>
+      
+    </div>
+
+  <script src="kts.js"></script>
+</body>
+</html>
+

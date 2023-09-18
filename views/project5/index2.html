@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timer Example</title>
+</head>
+<body>
+    <div id="timer">00:00:00</div>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button onclick="resetTimer()">Reset</button>
+
+    <script>
+        let startTime;
+        let timerInterval;
+
+        // Check if a timer is already running in local storage
+        const storedStartTime = localStorage.getItem('startTime');
+        if (storedStartTime) {
+            startTime = new Date(storedStartTime);
+            startTimer();
+        }
+
+        function startTimer() {
+            if (!startTime) {
+                startTime = new Date();
+                localStorage.setItem('startTime', startTime);
+            }
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            startTime = null;
+            localStorage.removeItem('startTime');
+            document.getElementById('timer').textContent = '00:00:00';
+        }
+
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedTime = currentTime - startTime;
+            const hours = Math.floor(elapsedTime / 3600000);
+            const minutes = Math.floor((elapsedTime % 3600000) / 60000);
+            const seconds = Math.floor((elapsedTime % 60000) / 1000);
+            document.getElementById('timer').textContent = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+        }
+
+        function padZero(value) {
+            return value < 10 ? `0${value}` : value;
+        }
+    </script>
+</body>
+</html>
