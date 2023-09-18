@@ -20,6 +20,7 @@ app.get("/home", (req, res) => {
 app.get("/project1", (req, res) => {
   res.render("index");
 });
+
 app.get("/project2", (req, res) => {
   res.render("index");
 });
@@ -30,17 +31,6 @@ app.get("/project3", (req, res) => {
 app.get("/project4", (req, res) => {
   res.render("index");
 });
-app.get("/project", (req, res) => {
-  res.render("index");
-});
-app.get("/project5/js1", (req, res) => {
-  res.render("index");
-});
-app.get("/project5/js2", (req, res) => {
-  res.render("index");
-});
-
-
 
 app.get("/", (req, res) => {
   res.send({ status: 400, msg: "success" });

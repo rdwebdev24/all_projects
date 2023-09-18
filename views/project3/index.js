@@ -1,243 +1,254 @@
-console.log('suduko solver');
+// INITIALISING
+const boxes = document.querySelectorAll(".box");
+const board = document.querySelector(".board");
+const Score = document.querySelector(".score");
+const BestScore = document.querySelector(".best-score");
+const newgame_btn = document.querySelector(".newgame");
+// VARAIABLES
+var score = 0;
+var best = 20;
+var boardArr = [
+  [0,0,0,0],
+  [0,0,0,0],
+  [0,0,0,0],
+  [0,0,0,0],
+]
+var color = {
+  2:"#eee4da",
+  4:"#eee1c9",
+  8:"#f3b27a",
+  16:"#f69664",
+  32:"#f77c5f",
+  64:"#f75f3b",
+  128:"#edd073",
+  256:"#edd073",
+  512:"#edd073",
+  1024:"#edd073",
+  2046:"#edd073",
+}
+// RANDOM NUMBER GENERAOTR
+function getrandomIndex() {return Math.floor(Math.random() * boxes.length);}
+// DELAY FUNSTION
+function sleep(ms){return new Promise((resolve)=>setTimeout(resolve, ms))}
 
-const board = document.querySelector('#board');
-const numberBox = document.querySelector('#number-div')
-const nums = document.querySelectorAll('.num');
-const delete_num = document.querySelector('#delete-num');
-const clear_btn = document.querySelector('.clear-btn');
-const solve_btn = document.querySelector('.solve-btn');
-
-// change according to on which element my cursor is
-var currbox = 0
-var stop = false;
-var running = false;
-const hardStr = "8---3----6--7--9-2---5--7---4-57---3---1--3---1--68--8-5--1-9--4-----5-7------1--"
-const boxArr = ["1,2,3,10,11,12,19,20,21","4,5,6,13,14,15,22,23,24","7,8,9,16,17,18,25,26,27","28,29,30,37,38,39,46,47,48","31,32,33,40,41,42,49,50,51","34,35,36,43,44,45,51,52,52","55,56,57,64,65,66,73,74,75","58,59,60,67,68,69,76,77,78","61,62,63,70,71,72,79,80,81"]
-// CLEARIGN THE BOARD
-clear_btn.addEventListener('click',()=>{
-    stop = true;
-    running = false;
-    document.querySelectorAll('.box').forEach((item)=>{
-        item.style.transform = 'rotate(90deg) scale(0)'
-        setTimeout(() => {
-            item.innerHTML = ""
-            item.style.transform = 'rotate(0deg)scale(1)'
-        }, 350);
-    })
-})
-
-// CREATING BOXES
-for(var i=1; i<=81; i++){
-    const ele = document.createElement('div');
-    ele.setAttribute('class','box');
-    ele.setAttribute('id',i);
-    // ele.innerHTML = i
-    board.appendChild(ele);
-    if(i%3==0 && i%9!=0) ele.style.borderRightColor = 'black'
-    if(i>=19 && i<=27 || i>=45 && i<=54) ele.style.borderBottomColor = 'black'
-    // SHOWING THE NUMBER DIV WHENM HOVER ON EACH BOX
-    ele.addEventListener('mouseenter', () => {
-        const position = ele.getBoundingClientRect();
-        numberBox.style.left = ( position.right - 15 ) + 'px';
-        numberBox.style.top = ( position.bottom - 15 )+ 'px';
-        currbox = ele.getAttribute('id')
-    });
+function convertToRowCol(number) {
+  if (number < 0 || number > 15) {return null;}
+  const row = Math.floor(number / 4);
+  const col = number % 4;
+  return { row, col };
 }
 
-// HIDE SHOW NUMBER DIV WHEN ENTER AND LEAVE BOARD
-board.addEventListener('mouseleave',()=>{if(!running) numberBox.style.transform = 'scale(0)'})
-board.addEventListener('mouseenter',()=>{if(!running) numberBox.style.transform = 'scale(1)'})
-delete_num.addEventListener('click',()=> document.getElementById(currbox.toString()).innerHTML = '')
-solve_btn.addEventListener('click',async()=>{
-    stop = false;
-    running = true;
-    await SUDUKOSOLVER()
-})
+function Reset () {
+  score = 0;
+  best = 0;
+  for(var i=0; i<4; i++){
+    for(var j=0; j<4; j++){
+      boardArr[i][j] = 0
+    }
+  }
+  updateBoard()
+}
+
+function randomNumGenerate() {
+  Reset();
+  boxes.forEach(item=>{item.innerHTML = ""})
+  var rndmIdx1 = getrandomIndex();
+  var rndmIdx2 = getrandomIndex();
+  // Make sure rndmIdx2 is different from rndmIdx1
+  while (rndmIdx2 === rndmIdx1) {rndmIdx2 = getrandomIndex();}
+  boxes[rndmIdx1].style.background = '#eee4da'
+  boxes[rndmIdx2].style.background = '#eee4da'
+  boardArr[convertToRowCol(rndmIdx1).row][convertToRowCol(rndmIdx1).col] = 2
+  boardArr[convertToRowCol(rndmIdx2).row][convertToRowCol(rndmIdx2).col] = 2
+  updateBoard()
+}
+
+newgame_btn.addEventListener('click',()=>{randomNumGenerate()})
+
+window.onload = randomNumGenerate()
+window.onload = updateBoard()
 
 
+function shiftZeroLeft(arr) {
+  var result = [];
+  for (var i = 0; i < arr.length; i++) {if (arr[i] !== 0) result.push(arr[i])}
+  var numberOfZeros = arr.length - result.length;
+  for (var j = 0; j < numberOfZeros; j++) result.push(0)
+  return result;
+}
 
-// WHEN CLICKING ON NUMBER-DIV ELEMENT PLACE THAT ELEMENT TO THE BOARD BOX
-nums.forEach((item,index)=>{
-    item.addEventListener('click',()=>{
-        document.getElementById(currbox.toString()).innerHTML = index+1
-        ISVALIDSUDUKO(index+1);
-    })
-})
-// CHECKING THE VALID SUDOKO 
-const ISVALIDSUDUKO = (currvalue) => {
-    var isfound = false;
+function shiftZeroRight(arr) {
+  var result = [];
+  for (var i = 0; i < arr.length; i++) {if (arr[i] !== 0) result.push(arr[i])}
+  var numberOfZeros = arr.length - result.length;
+  for (var j = 0; j < numberOfZeros; j++) result.unshift(0)
+  return result;
+}
 
-    // Get the row and column of the current cell
-    const startRow = Math.floor((currbox - 1) / 9);
-    const startCol = (currbox - 1) % 9;
-    const boxNumber = GETLARGEBOXNUMBER(startRow,startCol);
-    
-    // checking in each box for the same value 
-    boxArr[boxNumber].split(',').forEach(item=>{
-        if(item!=currbox && document.getElementById(item).innerHTML==currvalue){
-            alert('same values not allowed');
-            document.getElementById(currbox).innerHTML = ''
-            isfound = true;
+function shiftZeroBottom() {
+  for (let col = 0; col < boardArr[0].length; col++) {
+    let nonZeroIndex = 0;
+    for (let row = 0; row < boardArr.length; row++) {
+      if (boardArr[row][col] !== 0) {
+        boardArr[nonZeroIndex][col] = boardArr[row][col];
+        if (nonZeroIndex !== row) {
+          boardArr[row][col] = 0;
         }
-    })
-    if(isfound)return;
-
-    // CHECK FOR SAME VALUES IN RIGHT
-    var currboxvalue = Number(currbox);
-    while(true){
-        if(currboxvalue%9==0){break;}
-        ++currboxvalue;
-        if(document.getElementById(currboxvalue.toString())?.innerHTML==currvalue){
-            alert('same values not allowed');
-            document.getElementById(currbox.toString()).innerHTML = ''
-            isfound = true;
-            break;
-        }
-    }
-    if(isfound)return;
-
-    // CHECK FOR SAME VALUES IN LEFT
-    currboxvalue = Number(currbox);
-    while(true){
-        if((currboxvalue-1)%9==0){break;}
-        --currboxvalue;
-        if(document.getElementById(currboxvalue.toString())?.innerHTML==currvalue){
-            alert('same values not allowed');
-            document.getElementById(currbox.toString()).innerHTML = ''
-            isfound = true;
-            break;
-        }
-    }
-    if(isfound)return
-
-    // CHECK FOR SAME VALUES IN top
-    currboxvalue = Number(currbox);
-    while(true){
-        currboxvalue = currboxvalue-9;
-        if(currboxvalue<=0){break;}
-        if(document.getElementById(currboxvalue.toString()).innerHTML==currvalue){
-            alert('same values not allowed');
-            document.getElementById(currbox.toString()).innerHTML = ''
-            isfound = true;
-            break;
-        }
-    }
-    if(isfound)return
-
-    // CHECK FOR SAME VALUES IN bottom
-    currboxvalue = Number(currbox);
-    while(true){
-        currboxvalue+=9;
-        if(currboxvalue>81){break;}
-        if(document.getElementById(currboxvalue.toString())?.innerHTML==currvalue){
-            alert('same values not allowed');
-            document.getElementById(currbox.toString()).innerHTML = ''
-            break;
-        }
-    }
-}
-// GETTING THE LARGER BOX NUMBER 
-function GETLARGEBOXNUMBER(row, col) {
-    // Divide the row and column indices by 3 and round down to find the large box
-    const largeBoxRow = Math.floor(row / 3);
-    const largeBoxCol = Math.floor(col / 3);
-    // Calculate the large box number (0-8) based on row and column
-    const largeBoxNumber = largeBoxRow * 3 + largeBoxCol;
-    return largeBoxNumber;
-}
-// CONVERTING BOARD TO STRING 
-function BOARDTOSTRING() {
-    var string = "";
-    var validNum = /[1-9]/;
-    var boxes = document.querySelectorAll(".box");
-    for (var i = 0; i < boxes.length; i++) {
-        if (validNum.test(boxes[i].innerText)) string += boxes[i].innerText;
-        else string += "-";
-    }
-    return string;
-}
-// CONVERTING STRING TO BOARD
-function STRINGTOBOARD(string) {
-    if(!string) return;
-    var currentCell;
-    var validNum = /[1-9]/;
-    var cells = string.split("");
-    var boxes = document.querySelectorAll(".box");
-    for (var i = 0; i < boxes.length; i++) {
-        currentCell = cells.shift();
-        if (validNum.test(currentCell)) boxes[i].innerText = currentCell;
-    }
-}
-
-// SUDUKO SOLVER FUNCTION
-async function SUDUKOSOLVER (){
-    const boardString = BOARDTOSTRING();
-    const solvedString = await RECURSIVESOLVE(boardString);
-    STRINGTOBOARD(solvedString);
-    running = false;
-}
-
-async function RECURSIVESOLVE(boardString) {
-    var boardArray = boardString.split("");
-    if (BOARDISSOLVED(boardArray)) {return boardArray.join("");}
-    var cellPossibilities = getNextCellAndPossibilities(boardArray);
-    var nextUnsolvedCellIndex = cellPossibilities.index;
-    var possibilities = cellPossibilities.choices;
-    for (var i = 0; i < possibilities.length; i++) {
-        if(stop){return;}
-        boardArray[nextUnsolvedCellIndex] = possibilities[i];
-        STRINGTOBOARD(boardArray.join(""));
-        await sleep(10); 
-        var solvedBoard = await RECURSIVESOLVE(boardArray.join(""));
-        if (solvedBoard) {
-            return solvedBoard;
-        }
-    }
-    return false;
-}
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function getNextCellAndPossibilities(boardArray) {
-  for (var i = 0; i < boardArray.length; i++) {
-    if (boardArray[i] === "-") {
-      var existingValues = getAllIntersections(boardArray, i);
-      var choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].filter(function (num) {
-        return existingValues.indexOf(num) < 0;
-      });
-      return { index: i, choices: choices };
+        nonZeroIndex++;
+      }
     }
   }
 }
 
-function getAllIntersections(boardArray, i) {
-    return getRow(boardArray, i).concat(getColumn(boardArray, i)).concat(getBox(boardArray, i));
+function shiftZeroTop() {
+  for (let col = 0; col < boardArr[0].length; col++) {
+    let zeroIndex = 0;
+    for (let row = 0; row < boardArr.length; row++) {
+      if (boardArr[row][col] === 0) {
+        boardArr[row][col] = boardArr[zeroIndex][col];
+        boardArr[zeroIndex][col] = 0;
+        zeroIndex++;
+      }
+    }
+  }
 }
 
-function getRow(boardArray, i) {
-  var startingEl = Math.floor(i / 9) * 9;
-  return boardArray.slice(startingEl, startingEl + 9);
+function updateleft(){
+  for(var j=0; j<4; j++){
+    for (var i = 0; i < 4; i++) {
+      var index = 4*i + j%4;
+      if (boardArr[j][i] == boardArr[j][i + 1]) {
+        boardArr[j][i] = boardArr[j][i] + boardArr[j][i + 1];
+        score +=boardArr[j][i];
+        boardArr[j][i + 1] = 0;
+      }
+    }
+    boardArr[j] = shiftZeroLeft(boardArr[j]);
+  }
 }
 
-function getColumn(boardArray, i) {
-  var startingEl = Math.floor(i % 9);
-  return [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (num) {
-    return boardArray[startingEl + num * 9];
-  });
+function updateRight(){
+  for(var j=0; j<4; j++){
+    for (var i = 3; i >=0; i--) {
+      if (boardArr[j][i] == boardArr[j][i - 1]) {
+        boardArr[j][i] = boardArr[j][i] + boardArr[j][i - 1];
+        score += boardArr[j][i];
+        boardArr[j][i - 1] = 0;
+      }
+    }
+    boardArr[j] = shiftZeroRight(boardArr[j]);
+  }
 }
 
-function getBox(boardArray, i) {
-  var boxCol = Math.floor(i / 3) % 3;
-  var boxRow = Math.floor(i / 27);
-  var startingIndex = boxCol * 3 + boxRow * 27;
-  return [0, 1, 2, 9, 10, 11, 18, 19, 20].map(function (num) {
-    return boardArray[startingIndex + num];
-  });
+function updateBottom(){
+  for(var col=0; col<4; col++){
+    for (var row = 3; row >0; row--) {
+      if (boardArr[row][col] == boardArr[row-1][col]) {
+        boardArr[row][col] = boardArr[row][col] + boardArr[row-1][col];
+        score+=boardArr[row][col];
+        boardArr[row-1][col] = 0;
+      }
+    }
+  }
+  shiftZeroTop();
 }
 
-
-function BOARDISSOLVED(boardArray) {
-    for (var i = 0; i < boardArray.length; i++) {if (boardArray[i] === "-") return false;}
-    return true;
+function updateTop(){
+  for(var col=0; col<4; col++){
+    for (var row = 0; row < 3; row++) {
+      if (boardArr[row][col] == boardArr[row+1][col]) {
+        boardArr[row][col] = boardArr[row][col] + boardArr[row+1][col];
+        score+=boardArr[row][col];
+        boardArr[row+1][col] = 0;
+      }
+    }
+  }
+  shiftZeroBottom();
 }
+
+function updateBoard(){
+  for(var i=0; i<boardArr.length; i++){
+    for(var j=0; j<boardArr.length; j++){
+      var index = 4*i + j%4;
+      if(boardArr[i][j]<=8) boxes[index].style.color = "#776e65";
+      if(boardArr[i][j]!==0) {
+        if(boardArr[i][j]%8==0) boxes[index].style.color = "#fff";
+        boxes[index].style.background = color[boardArr[i][j]];
+        boxes[index].innerText = boardArr[i][j]
+      }
+      else {
+        boxes[index].innerText = ""
+        boxes[index].style.background = "#cdc1b4"
+      }
+    }
+  }
+  Score.innerText = `Score : ${score}`
+  BestScore.innerText = `Best : ${best}`
+}
+
+function insertNewNum(){
+  var newRow = Math.floor(Math.random() * boardArr.length);
+  var newCol = Math.floor(Math.random() * boardArr[0].length);
+
+  while(boardArr[newRow][newCol]!=0){
+    newRow = Math.floor(Math.random() * boardArr.length);
+    newCol = Math.floor(Math.random() * boardArr[0].length);
+  }
+  boardArr[newRow][newCol]=2
+  var index = 4*newRow+newCol%4;
+  boxes[index].innerText = "2";
+  boxes[index].style.background = color[2];
+}
+
+function checkWin(){
+  for(var row=0; row<4; row++){
+    for(var col=0; col<4; col++){
+      if(boardArr[row][col]==2048){
+        alert('win');return;
+      }
+    }
+  }
+}
+
+function checkLoose(){
+  var loose = true;
+  for(var row=0; row<4; row++){
+    for(var col=0; col<4; col++){
+      if(boardArr[row][col]==0){
+        loose = false;
+      }
+    }
+  }
+  if(loose){
+    alert('loose');
+    Reset();
+  }
+ 
+}
+
+function checkBest(){
+  if(score>=best){best = score;}
+}
+
+window.addEventListener('keydown', function(event) {
+    switch(event.key) {
+      case 'ArrowUp':
+        updateTop();
+        break;
+        case 'ArrowDown':
+        updateBottom();
+        break;
+      case 'ArrowLeft':
+        updateleft()
+        break;
+      case 'ArrowRight':
+        updateRight()
+        break;
+    }
+    checkBest()
+    updateBoard();
+    insertNewNum();
+    checkWin();
+    checkLoose();
+});
+

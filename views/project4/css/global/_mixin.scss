@@ -1,7 +1,0 @@
-@mixin flexprob($dir,$justify) {
-     display: flex;
-     flex-direction: $dir;
-     justify-content: $justify;
-     align-items: center;
-}
-
