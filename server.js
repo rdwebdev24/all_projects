@@ -46,6 +46,7 @@ app.get("/allprojects", (req, res) => {
     project.push(title)
   })
   project.shift();
+  for(var i=0; i<40000; i++){console.log(i);}
   res.send({ status: 400, msg: "success" ,project});
 });
 
