@@ -82,11 +82,11 @@ h1 {
 }
 
 .o-media__figure{
-    max-width: 15rem;
     width: 100%;
 }
 
 .skeleton-box {
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
   display: inline-block;
   height: 1em;
   position: relative;
