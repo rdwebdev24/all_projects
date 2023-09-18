@@ -1,5 +1,5 @@
-// var url = 'https://rdwebdev23.onrender.com/'
-var url = 'http://localhost:5000/'
+var url = 'https://rdwebdev23.onrender.com/'
+// var url = 'http://localhost:5000/'
 var html = ""
 
 function renderHTML(data){
